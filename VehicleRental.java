@@ -1,6 +1,8 @@
 
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
+// 🔹 Abstract Class for Vehicles (Abstraction)
 abstract class Vehicle {
 
     private final String type;
@@ -19,9 +21,11 @@ abstract class Vehicle {
         return pricePerDay;
     }
 
-    public abstract void displayDetails();
+    // 🔹 Abstract method for additional vehicle info (Polymorphism)
+    public abstract String getVehicleInfo();
 }
 
+// 🔹 Car Class (Inheritance)
 class Car extends Vehicle {
 
     public Car() {
@@ -29,11 +33,12 @@ class Car extends Vehicle {
     }
 
     @Override
-    public void displayDetails() {
-        System.out.println("Car - Rs. 2000/day");
+    public String getVehicleInfo() {
+        return "A car is a four-wheeled vehicle for comfortable travel.";
     }
 }
 
+// 🔹 Bike Class (Inheritance)
 class Bike extends Vehicle {
 
     public Bike() {
@@ -41,11 +46,12 @@ class Bike extends Vehicle {
     }
 
     @Override
-    public void displayDetails() {
-        System.out.println("Bike - Rs. 500/day");
+    public String getVehicleInfo() {
+        return "A bike is a two-wheeled vehicle for quick and efficient travel.";
     }
 }
 
+// 🔹 Reservation Class (Encapsulation)
 class Reservation {
 
     private final Vehicle vehicle;
@@ -56,59 +62,74 @@ class Reservation {
         this.days = days;
     }
 
+    // 🔹 Calculate Total Price (Polymorphism)
     public double calculateTotalPrice() {
         return vehicle.getPricePerDay() * days;
     }
 
     public String getDetails() {
-        return "Vehicle: " + vehicle.getType() + "\nDays: " + days + "\nTotal Price: " + calculateTotalPrice() + " Rs";
+        return "\n🚗 Vehicle: " + vehicle.getType()
+                + "\n📅 Days: " + days
+                + "\n💰 Total Price: " + calculateTotalPrice() + " Rs"
+                + "\nℹ️ " + vehicle.getVehicleInfo();
     }
 }
 
+// 🔹 Main Rental System Class
 public class VehicleRental {
 
-    private static void displayAvailableVehicles() {
-        System.out.println("Available Vehicles:");
-        new Car().displayDetails();
-        new Bike().displayDetails();
-    }
-
     public static void main(String[] args) {
-        try (Scanner scanner = new Scanner(System.in)) {
-            System.out.println(" Welcome to Vehicle Rental System ");
-            System.out.println("------------------------------------");
-            displayAvailableVehicles();
+        Scanner scanner = new Scanner(System.in);
+        Vehicle vehicle = null;
+        int days = 0;
 
-            System.out.print("Enter the vehicle type ([1] for Car, [2] for Bike): ");
+        try {
+            System.out.println("🚘 Welcome to Vehicle Rental System 🚘");
+            System.out.println("--------------------------------------");
+            System.out.println("Available vehicles:");
+            System.out.println("1️⃣ Car - 2000 Rs/day");
+            System.out.println("2️⃣ Bike - 500 Rs/day");
+            System.out.print("Enter your choice ([1] for Car, [2] for Bike): ");
+
             int vehicleChoice = scanner.nextInt();
-
-            Vehicle vehicle = switch (vehicleChoice) {
-                case 1 ->
-                    new Car();
-                case 2 ->
-                    new Bike();
-                default ->
-                    null;
-            };
+            vehicle = getVehicle(vehicleChoice);
 
             if (vehicle == null) {
-                System.out.println(" Invalid choice. Please restart and enter a valid option.");
-                return;
+                throw new IllegalArgumentException("Invalid vehicle selection!");
             }
 
             System.out.print("Enter the number of days: ");
-            int days = scanner.nextInt();
+            days = scanner.nextInt();
 
             if (days <= 0) {
-                System.out.println(" Invalid number of days. Please enter a positive value.");
-                return;
+                throw new IllegalArgumentException("Days must be greater than 0!");
             }
 
+            // 🔹 Creating Reservation
             Reservation reservation = new Reservation(vehicle, days);
-            System.out.println("\n Reservation Successful! Here are your details:");
+            System.out.println("\n✅ Reservation Confirmed:");
             System.out.println(reservation.getDetails());
+
+        } catch (InputMismatchException e) {
+            System.out.println("❌ Error: Please enter a valid number!");
+        } catch (IllegalArgumentException e) {
+            System.out.println("❌ Error: " + e.getMessage());
         } catch (Exception e) {
-            System.out.println(" Error: Invalid input. Please restart and enter valid details.");
+            System.out.println("❌ Unexpected Error: " + e.getMessage());
+        } finally {
+            scanner.close();
         }
+    }
+
+    // 🔹 Get Vehicle based on user choice (Encapsulation)
+    private static Vehicle getVehicle(int choice) {
+        return switch (choice) {
+            case 1 ->
+                new Car();
+            case 2 ->
+                new Bike();
+            default ->
+                null;
+        };
     }
 }
